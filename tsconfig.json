@@ -5,6 +5,24 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@/components/*": [
+        "./src/components/*"
+      ],
+      "@/screens/*": [
+        "./src/screens/*"
+      ],
+      "@/navigation/*": [
+        "./src/navigation/*"
+      ],
+      "@/constants/*": [
+        "./src/constants/*"
+      ],
+      "@/context/*": [
+        "./src/context/*"
+      ],
+      "@/utils/*": [
+        "./src/utils/*"
       ]
     }
   },
