@@ -4,9 +4,11 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { useCart } from '@/src/context/CartContext';
+import { useFavorites } from '@/src/context/FavoritesContext';
 
 export default function TabLayout() {
   const { getCartItemCount } = useCart();
+  const { getFavoritesCount } = useFavorites();
 
   return (
     <Tabs
@@ -52,6 +54,16 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <Icon name="user" size={24} color={color} />
           ),
+        }}
+      />
+       <Tabs.Screen
+        name="favorites"
+        options={{
+          title: 'Favorites',
+          tabBarIcon: ({ color }) => (
+            <Icon name="heart" size={24} color={color} />
+          ),
+          tabBarBadge: getFavoritesCount() > 0 ? getFavoritesCount() : undefined,
         }}
       />
     </Tabs>

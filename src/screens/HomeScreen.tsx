@@ -14,6 +14,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import Toast from 'react-native-toast-message';
 import { router } from 'expo-router';
 import { useCart, FoodItem } from '../context/CartContext';
+import { useFavorites } from '../context/FavoritesContext';
+import { useSearchHistory } from '../context/SearchHistoryContext';
 import { categories, getFoods, getPopularFoods, getFoodsByCategory, searchFoods } from '../data/foodData';
 
 const { width } = Dimensions.get('window');
@@ -26,6 +28,8 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   
   const { addToCart, getCartItemCount } = useCart();
+  const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
+  const { addSearch } = useSearchHistory();
 
   useEffect(() => {
     loadInitialData();
@@ -37,6 +41,8 @@ export default function HomeScreen() {
         try {
           const searchResults = await searchFoods(searchQuery);
           setFoods(searchResults);
+          // Save search query to history
+          addSearch(searchQuery.trim());
         } catch (error) {
           console.error('Error searching foods:', error);
         }
@@ -46,7 +52,7 @@ export default function HomeScreen() {
     };
     
     searchAndFilter();
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, addSearch]);
 
   const loadInitialData = async () => {
     try {
@@ -88,13 +94,21 @@ export default function HomeScreen() {
     <TouchableOpacity
       style={styles.foodCard}
       onPress={() => {
-        // For now, just show food details in an alert - we can create the route later
-        Toast.show({
-          type: 'info',
-          text1: item.name,
-          text2: `${item.description} - $${item.price}`,
-          position: 'top',
-          visibilityTime: 3000,
+        // Navigate to food details screen with params
+        router.push({
+          pathname: '/food-details',
+          params: { 
+            id: item.id.toString(),
+            name: item.name,
+            description: item.description,
+            price: item.price.toString(),
+            image: item.image,
+            rating: item.rating.toString(),
+            prepTime: item.prepTime,
+            category: item.category,
+            calories: item.calories.toString(),
+            isVeg: item.isVeg.toString()
+          }
         });
       }}
       activeOpacity={0.8}
@@ -102,11 +116,41 @@ export default function HomeScreen() {
       <View style={styles.foodImageContainer}>
         <Text style={styles.foodImage}>{item.image}</Text>
         {item.isVeg && <View style={styles.vegBadge} />}
+        <TouchableOpacity
+          style={styles.favoriteButton}
+          onPress={() => {
+            if (isFavorite(item.id)) {
+              removeFromFavorites(item.id);
+              Toast.show({
+                type: 'info',
+                text1: 'Removed from favorites',
+                text2: `${item.name} removed from favorites`,
+                position: 'bottom',
+                visibilityTime: 1500,
+              });
+            } else {
+              addToFavorites(item);
+              Toast.show({
+                type: 'success',
+                text1: 'Added to favorites',
+                text2: `${item.name} added to favorites`,
+                position: 'bottom',
+                visibilityTime: 1500,
+              });
+            }
+          }}
+        >
+          <Icon 
+            name={isFavorite(item.id) ? "heart" : "heart-o"} 
+            size={16} 
+            color={isFavorite(item.id) ? "#ff6b6b" : "#ccc"} 
+          />
+        </TouchableOpacity>
       </View>
       
       <View style={styles.foodInfo}>
         <Text style={styles.foodName} numberOfLines={1}>{item.name}</Text>
-        <Text style={styles.foodDescription} numberOfLines={2}>{item.description}</Text>
+        {/* <Text style={styles.foodDescription} numberOfLines={2}>{item.description}</Text> */}
         
         <View style={styles.foodMeta}>
           <View style={styles.rating}>
@@ -122,7 +166,7 @@ export default function HomeScreen() {
             style={styles.addButton}
             onPress={() => handleAddToCart(item)}
           >
-            <Icon name="plus" size={14} color="#fff" />
+            <Icon name="plus" size={12} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>
@@ -133,16 +177,54 @@ export default function HomeScreen() {
     <TouchableOpacity
       style={styles.popularCard}
       onPress={() => {
-        Toast.show({
-          type: 'info',
-          text1: item.name,
-          text2: `${item.description} - $${item.price}`,
-          position: 'top',
-          visibilityTime: 3000,
+        // Navigate to food details screen with params
+        router.push({
+          pathname: '/food-details',
+          params: { 
+            id: item.id.toString(),
+            name: item.name,
+            description: item.description,
+            price: item.price.toString(),
+            image: item.image,
+            rating: item.rating.toString(),
+            prepTime: item.prepTime,
+            category: item.category,
+            calories: item.calories.toString(),
+            isVeg: item.isVeg.toString()
+          }
         });
       }}
       activeOpacity={0.8}
     >
+      <TouchableOpacity
+        style={styles.popularFavoriteButton}
+        onPress={(e) => {
+          e.stopPropagation();
+          if (isFavorite(item.id)) {
+            removeFromFavorites(item.id);
+            Toast.show({
+              type: 'info',
+              text1: 'Removed from favorites',
+              position: 'bottom',
+              visibilityTime: 1500,
+            });
+          } else {
+            addToFavorites(item);
+            Toast.show({
+              type: 'success',
+              text1: 'Added to favorites',
+              position: 'bottom',
+              visibilityTime: 1500,
+            });
+          }
+        }}
+      >
+        <Icon 
+          name={isFavorite(item.id) ? "heart" : "heart-o"} 
+          size={14} 
+          color={isFavorite(item.id) ? "#ff6b6b" : "#ccc"} 
+        />
+      </TouchableOpacity>
       <Text style={styles.popularImage}>{item.image}</Text>
       <Text style={styles.popularName} numberOfLines={1}>{item.name}</Text>
       <Text style={styles.popularPrice}>${item.price}</Text>
@@ -159,13 +241,13 @@ export default function HomeScreen() {
   );
 
   return (
-    <LinearGradient colors={['#ff6b6b', '#ee5a24']} style={styles.container}>
+    <LinearGradient colors={['#688c5bff', '#63a055ff']} style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Text style={styles.greeting}>Hello! 👋</Text>
-            <Text style={styles.title}>What would you like to eat?</Text>
+            <Text style={styles.title}>Muhammad Nidal</Text>
           </View>
           <TouchableOpacity 
             style={styles.cartButton}
@@ -382,7 +464,7 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
   categoriesContainer: {
-    paddingLeft: 20,
+    paddingLeft: 10,
   },
   sectionTitle: {
     fontSize: 20,
@@ -406,7 +488,7 @@ const styles = StyleSheet.create({
   categoryButton: {
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.15)',
-    borderRadius: 20,
+    borderRadius: 10,
     padding: 16,
     marginRight: 15,
     minWidth: 85,
@@ -490,9 +572,28 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
   },
+  popularFavoriteButton: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 15,
+    width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
   foodSection: {
     paddingHorizontal: 20,
     paddingBottom: 30,
+    width: '100%',
+    minHeight: 300,
+    flex: 1,
   },
   row: {
     justifyContent: 'space-between',
@@ -528,6 +629,22 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     backgroundColor: '#4CAF50',
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 15,
+    width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
   foodInfo: {
     padding: 18,
@@ -586,9 +703,9 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: '#ff6b6b',
-    borderRadius: 18,
-    width: 36,
-    height: 36,
+    borderRadius: 14,
+    width: 28,
+    height: 28,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 2,

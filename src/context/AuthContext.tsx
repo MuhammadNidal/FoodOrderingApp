@@ -43,9 +43,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (email && password.length >= 6) {
       const mockUser: User = {
         id: '1',
-        name: 'John Doe',
+        name: 'Muhammad Nidal',
         email: email,
-        phone: '+1 (555) 123-4567',
+        phone: '03180535435',
         avatar: '👤'
       };
       setUser(mockUser);

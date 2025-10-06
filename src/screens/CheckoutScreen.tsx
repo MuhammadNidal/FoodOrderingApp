@@ -13,10 +13,12 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { router } from 'expo-router';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useOrderHistory } from '../context/OrderHistoryContext';
 
 export default function CheckoutScreen() {
   const { cart, getCartTotal, clearCart } = useCart();
   const { user } = useAuth();
+  const { addOrder } = useOrderHistory();
   
   const [selectedPayment, setSelectedPayment] = useState('card');
   const [deliveryAddress, setDeliveryAddress] = useState('');
@@ -43,6 +45,9 @@ export default function CheckoutScreen() {
 
     setLoading(true);
     
+    // Create order in order history
+    const orderId = addOrder(cart, total, deliveryAddress.trim(), selectedPayment);
+    
     // Simulate order processing
     setTimeout(() => {
       setLoading(false);
@@ -50,7 +55,7 @@ export default function CheckoutScreen() {
       
       Alert.alert(
         'Order Placed Successfully! 🎉',
-        `Your order has been confirmed and will be delivered in 30-45 minutes.\n\nOrder Total: $${total.toFixed(2)}`,
+        `Your order #${orderId.slice(-8)} has been confirmed and will be delivered in 30-45 minutes.\n\nOrder Total: $${total.toFixed(2)}`,
         [
           {
             text: 'Track Order',
@@ -66,14 +71,14 @@ export default function CheckoutScreen() {
   };
 
   return (
-    <LinearGradient colors={['#ff6b6b', '#ee5a24']} style={styles.container}>
+    <LinearGradient colors={['#688c5bff', '#63a055ff']} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        {/* <TouchableOpacity onPress={() => router.back()} style={styles.headerButton}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.headerButton}>
           <Icon name="arrow-left" size={24} color="#fff" />
-        </TouchableOpacity> */}
-        {/* <Text style={styles.headerTitle}>Checkout</Text>
-        <View style={styles.headerButton} /> */}
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Checkout</Text>
+        <View style={styles.headerButton} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -422,7 +427,8 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   bottomContainer: {
-    backgroundColor: '#e98b48ff',
+    backgroundColor: '#679656ff',
+    
     paddingHorizontal: 20,
     paddingVertical: 20,
     borderTopLeftRadius: 20,
