@@ -75,7 +75,7 @@ export default function CartScreen() {
   const total = subtotal + tax + deliveryFee;
 
   return (
-    <LinearGradient colors={['#ff6b6b', '#ee5a24']} style={styles.container}>
+    <LinearGradient colors={['#688c5bff', '#63a055ff']} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.headerButton}>

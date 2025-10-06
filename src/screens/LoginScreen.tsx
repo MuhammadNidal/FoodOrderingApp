@@ -78,23 +78,12 @@ export default function LoginScreen({ redirectTo = '/cart' }: LoginScreenProps) 
     }
   };
 
-  const handleGoogleLogin = () => {
-    Alert.alert('Google Login', 'Google authentication would be implemented here');
-  };
-
   const handleSkip = () => {
-    Alert.alert(
-      'Continue as Guest?',
-      'You can browse and add items to cart, but you\'ll need to login to place orders.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Continue as Guest', onPress: () => router.back() }
-      ]
-    );
-  };
+    router.push('/(tabs)/profile');
+  }
 
   return (
-    <LinearGradient colors={['#ff6b6b', '#ee5a24']} style={styles.container}>
+    <LinearGradient colors={['#7ac65fff', '#46af2eff']} style={styles.container}>
       <KeyboardAvoidingView 
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
@@ -210,10 +199,10 @@ export default function LoginScreen({ redirectTo = '/cart' }: LoginScreenProps) 
               <View style={styles.dividerLine} />
             </View>
 
-            <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
+            {/* <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
               <Icon name="google" size={20} color="#db4437" />
               <Text style={styles.googleButtonText}>Continue with Google</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             <View style={styles.switchContainer}>
               <Text style={styles.switchText}>

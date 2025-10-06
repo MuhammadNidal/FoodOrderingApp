@@ -64,7 +64,7 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <LinearGradient colors={['#ff6b6b', '#ee5a24']} style={styles.container}>
+    <LinearGradient colors={['#688c5bff', '#63a055ff']} style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Profile</Text>
